@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block titre %}Nouvelle déclaration · MariTrust{% endblock %}
+{% block contenu %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">Nouvelle déclaration</h1>
+    <p class="text-muted mb-0">Déclaration déposée au nom de <strong>{{ societe.nom }}</strong>.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'declarations:mes_declarations' %}">Mes déclarations</a>
+</div>
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="card shadow-sm mb-4"><div class="card-body">
+    <h2 class="h5 mb-3">Cargaison et arrivée</h2>
+    <div class="row g-3">
+      {% for field in form %}
+      <div class="col-md-6">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div></div>
+  <div class="card shadow-sm mb-4"><div class="card-body">
+    <h2 class="h5 mb-1">Ports d'escale</h2>
+    <p class="text-muted small">Renseignez jusqu'à 10 ports, dans l'ordre de passage. Les lignes vides sont ignorées.</p>
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
+    {% for escale_form in formset %}
+    <div class="row align-items-center mb-2">
+      <div class="col-auto text-muted" style="width: 3rem">{{ forloop.counter }}.</div>
+      <div class="col-md-7">
+        <label class="visually-hidden" for="{{ escale_form.port_escale.id_for_label }}">Port d'escale {{ forloop.counter }}</label>
+        {{ escale_form.port_escale }}
+        {% for error in escale_form.port_escale.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div></div>
+  <button class="btn btn-primary">Enregistrer la déclaration</button>
+</form>
+{% endblock %}
