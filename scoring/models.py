@@ -15,6 +15,7 @@ class Critere(models.Model):
         OPERATEUR = "operateur", "Opérateur"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.SlugField(unique=True, help_text="Identifiant stable du critère (ex: poids_conteneur).")
     nom = models.CharField(max_length=150)
     categorie = models.CharField(max_length=20, choices=Categorie.choices)
     poids = models.PositiveIntegerField(help_text="Points attribués lorsque ce critère se déclenche.")
