@@ -38,5 +38,5 @@ class Command(BaseCommand):
         for nom, pays, risque in ports:
             PortEscale.objects.get_or_create(nom=nom, pays=pays, defaults={"niveau_risque": risque})
         for nom, code, cat, poids in CRITERES:
-            Critere.objects.get_or_create(nom=nom, defaults={"code": code, "categorie": cat, "poids": poids})
+            Critere.objects.get_or_create(code=code, defaults={"nom": nom, "categorie": cat, "poids": poids})
         self.stdout.write(self.style.SUCCESS("Données de démonstration créées (mot de passe : demo1234)."))

@@ -30,6 +30,18 @@ def creer_declaration(request):
                 navire_nom = form.cleaned_data["navire_nom"]
                 navire_pavillon = form.cleaned_data["navire_pavillon"]
 
+                # navire_pavillon est requis seulement si le navire n'existe pas encore.
+                # On vérifie l'existence AVANT get_or_create pour éviter la création
+                # accidentelle quand le pavillon est manquant.
+                if not Navire.objects.filter(numero_imo=navire_imo).exists() and not navire_pavillon:
+                    form.add_error(
+                        "navire_pavillon",
+                        "Le pavillon est requis pour un nouveau navire."
+                    )
+                    return render(request, "declarations/declaration_form.html", {
+                        "form": form, "formset": formset, "societe": request.user.societe,
+                    })
+
                 navire, navire_cree = Navire.objects.get_or_create(
                     numero_imo=navire_imo,
                     defaults={"nom": navire_nom, "pavillon_actuel": navire_pavillon or "Inconnu"},
@@ -41,15 +53,6 @@ def creer_declaration(request):
                             request,
                             f"Navire existant conservé : {navire.nom} (IMO {navire_imo})."
                         )
-                else:
-                    if not navire_pavillon:
-                        form.add_error(
-                            "navire_pavillon",
-                            "Le pavillon est requis pour un nouveau navire."
-                        )
-                        return render(request, "declarations/declaration_form.html", {
-                            "form": form, "formset": formset, "societe": request.user.societe,
-                        })
 
                 declaration = form.save(commit=False)
                 # L'opérateur est la société consignataire du compte : le

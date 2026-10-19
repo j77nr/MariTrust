@@ -33,3 +33,14 @@ class CritereCodeTests(TestCase):
         ]:
             critere = Critere.objects.get(nom=nom)
             self.assertEqual(critere.code, code_attendu)
+
+    def test_seed_demo_use_get_or_create_sur_code(self):
+        """seed_demo doit faire get_or_create(code=code, ...) — relance idempotent."""
+        from io import StringIO
+        from django.core.management import call_command
+        call_command("seed_demo", stdout=StringIO())
+        count_apres_premier_seed = Critere.objects.count()
+
+        # Second appel : pas de doublons grâce à get_or_create(code=code)
+        call_command("seed_demo", stdout=StringIO())
+        self.assertEqual(Critere.objects.count(), count_apres_premier_seed)

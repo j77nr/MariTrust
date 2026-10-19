@@ -16,8 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Critere',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('code', models.SlugField(help_text='Identifiant stable du critère (ex: poids_conteneur).', unique=True)),
+                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, serialize=False)),
                 ('nom', models.CharField(max_length=150)),
                 ('categorie', models.CharField(choices=[('cargaison', 'Cargaison'), ('navire', 'Navire'), ('operateur', 'Opérateur')], max_length=20)),
                 ('poids', models.PositiveIntegerField(help_text='Points attribués lorsque ce critère se déclenche.')),
@@ -33,7 +32,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ScoreDetail',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, serialize=False)),
                 ('points_attribues', models.PositiveIntegerField()),
                 ('critere', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='occurrences', to='scoring.critere')),
                 ('declaration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='score_details', to='declarations.declaration')),

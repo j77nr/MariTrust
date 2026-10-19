@@ -145,3 +145,19 @@ class DeclarationDeclarantTests(TestCase):
         self.assertContains(response, "chiffre de contrôle")
         self.assertEqual(Navire.objects.count(), 1)
         self.assertEqual(Declaration.objects.count(), 0)
+
+    def test_navire_inconnu_avec_pavillon_vide_est_refuse(self):
+        """IMO valide mais pavillon vide pour un navire inconnu → refusé, pas de création."""
+        self.client.force_login(self.declarant)
+        count_avant = Navire.objects.count()
+        data = self._donnees_formulaire(
+            navire_nom="Nouveau Sans Pavillon",
+            navire_imo=self.IMO_VALIDE_AUTRE,
+            navire_pavillon=""
+        )
+        response = self.client.post(reverse("declarations:creer_declaration"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "pavillon")
+        self.assertEqual(Navire.objects.count(), count_avant)  # pas de création
+        self.assertEqual(Declaration.objects.count(), 0)
