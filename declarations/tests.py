@@ -142,6 +142,6 @@ class DeclarationDeclarantTests(TestCase):
         response = self.client.post(reverse("declarations:creer_declaration"), data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, "form", "navire_imo")
+        self.assertContains(response, "chiffre de contrôle")
         self.assertEqual(Navire.objects.count(), 1)
         self.assertEqual(Declaration.objects.count(), 0)

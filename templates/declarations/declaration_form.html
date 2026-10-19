@@ -10,16 +10,39 @@
 </div>
 <form method="post" novalidate>
   {% csrf_token %}
+  {% if messages %}{% for message in messages %}<div class="alert alert-info py-2 mb-3">{{ message }}</div>{% endfor %}{% endif %}
   {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="card shadow-sm mb-4"><div class="card-body">
+    <h2 class="h5 mb-3">Navire</h2>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="id_navire_imo">Numéro IMO (7 chiffres)</label>
+        {{ form.navire_imo }}
+        {% for error in form.navire_imo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="id_navire_nom">Nom du navire</label>
+        {{ form.navire_nom }}
+        {% for error in form.navire_nom.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="id_navire_pavillon">Pavillon</label>
+        {{ form.navire_pavillon }}
+        <div class="form-text small">Requis seulement si le navire est nouveau.</div>
+      </div>
+    </div>
+  </div></div>
   <div class="card shadow-sm mb-4"><div class="card-body">
     <h2 class="h5 mb-3">Cargaison et arrivée</h2>
     <div class="row g-3">
       {% for field in form %}
+      {% if field.name not in "navire_nom,navire_imo,navire_pavillon" %}
       <div class="col-md-6">
         <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
         {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
       </div>
+      {% endif %}
       {% endfor %}
     </div>
   </div></div>
