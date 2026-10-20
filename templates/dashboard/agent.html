@@ -1,6 +1,171 @@
 {% extends "base.html" %}
-{% block titre %}Dashboard agent · MariTrust{% endblock %}
+{% load static %}
+{% block titre %}Supervision des risques · MariTrust{% endblock %}
 {% block contenu %}
-<h1 class="h3">Dashboard agent</h1>
-<p class="text-muted">Ici les déclarations arriveront en temps réel, triées par risque (semaines 4 et 5).</p>
+<div class="mt-page-heading">
+  <div>
+    <div class="small text-secondary mb-2"><i class="bi bi-shield-check me-1"></i> Système MariTrust</div>
+    <h1 class="h2 fw-semibold mb-1">Supervision des risques</h1>
+    <p class="text-secondary mb-0">File d’analyse des déclarations anticipées</p>
+  </div>
+  <span class="mt-live-status"><span class="mt-live-dot"></span><i class="bi bi-broadcast me-1"></i> Données actualisées à l’ouverture</span>
+</div>
+
+<div class="mt-agent-layout">
+  <section class="mt-panel mt-queue" aria-labelledby="queue-title">
+    <div class="mt-queue-header">
+      <div class="d-flex align-items-start justify-content-between gap-3">
+        <div>
+          <h2 class="h6 fw-semibold mb-1" id="queue-title">Déclarations entrantes</h2>
+          <p class="small text-secondary mb-0">{{ declarations_a_traiter }} dossier{{ declarations_a_traiter|pluralize }} à examiner</p>
+        </div>
+        <span class="mt-sort-label">TRI · RISQUE</span>
+      </div>
+      <label class="visually-hidden" for="agent-search">Rechercher une déclaration</label>
+      <div class="input-group mt-3">
+        <span class="input-group-text bg-white"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <input class="form-control" id="agent-search" type="search" placeholder="Navire, marchandise ou référence" data-agent-search>
+      </div>
+      <div class="d-flex gap-2 mt-3">
+        <span class="badge text-bg-light fw-normal">{{ declarations|length }} au total</span>
+        <span class="badge mt-risk-badge mt-risk-badge-high">{{ risques_eleves }} risque{{ risques_eleves|pluralize }} élevé{{ risques_eleves|pluralize }}</span>
+      </div>
+    </div>
+
+    <div class="mt-queue-list" data-agent-rows>
+      {% for declaration in declarations %}
+      <a class="mt-declaration-row{% if selected_declaration.id == declaration.id %} is-selected{% endif %}"
+         href="?declaration={{ declaration.id }}"
+         data-agent-row
+         data-search-text="{{ declaration.navire.nom }} {{ declaration.navire.numero_imo }} {{ declaration.type_marchandise }} {{ declaration.operateur.nom }} {{ declaration.get_statut_traitement_display }}"
+         {% if selected_declaration.id == declaration.id %}aria-current="true"{% endif %}>
+        <div class="d-flex align-items-start justify-content-between gap-3">
+          <div class="min-w-0">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-ship text-primary" aria-hidden="true"></i>
+              <span class="fw-semibold text-truncate">{{ declaration.navire.nom }}</span>
+            </div>
+            <p class="small text-secondary text-truncate mt-1 mb-0 ps-4">{{ declaration.type_marchandise }}</p>
+          </div>
+          <span class="mt-risk-badge mt-risk-badge-{{ declaration.niveau_risque }}">
+            {{ declaration.get_niveau_risque_display }} <strong>{{ declaration.score }}</strong>
+          </span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between gap-2 mt-3 ps-4 small text-secondary">
+          <span class="text-truncate">
+            {% for escale in declaration.escales_ordonnees %}{{ escale.port_escale.nom }}{% if not forloop.last %} → {% endif %}{% empty %}Aucune escale renseignée{% endfor %}
+          </span>
+          <time class="text-nowrap" datetime="{{ declaration.date_declaration|date:'c' }}">{{ declaration.date_declaration|date:"d/m/Y H:i" }}</time>
+        </div>
+      </a>
+      {% empty %}
+      <div class="mt-empty-state">
+        <span class="mt-empty-icon"><i class="bi bi-inbox"></i></span>
+        <h3 class="h6 fw-semibold mt-3">Aucune déclaration à afficher</h3>
+        <p class="small text-secondary mb-0">Les déclarations enregistrées apparaîtront ici.</p>
+      </div>
+      {% endfor %}
+      <p class="small text-secondary text-center p-3 mb-0 d-none" data-agent-no-results>Aucun résultat pour cette recherche.</p>
+    </div>
+  </section>
+
+  {% if selected_declaration %}
+  <section class="mt-panel mt-case" aria-labelledby="case-title">
+    <header class="mt-case-header">
+      <div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <h2 class="h5 fw-semibold mb-0" id="case-title">{{ selected_declaration.navire.nom }}</h2>
+          <span class="mt-risk-badge mt-risk-badge-{{ selected_declaration.niveau_risque }}">{{ selected_declaration.get_niveau_risque_display }}</span>
+          <span class="badge text-bg-light fw-normal">{{ selected_declaration.get_statut_traitement_display }}</span>
+        </div>
+        <p class="small text-secondary font-monospace mt-2 mb-0">IMO {{ selected_declaration.navire.numero_imo }} · Référence lisible indisponible</p>
+      </div>
+      <div class="mt-score-summary">
+        <span class="mt-score-circle mt-score-{{ selected_declaration.niveau_risque }}">{{ selected_declaration.score }}</span>
+        <span class="small text-secondary">points de risque</span>
+      </div>
+    </header>
+
+    <div class="mt-case-content">
+      <div class="mt-case-factors">
+        <section class="pb-4 border-bottom">
+          <h3 class="mt-section-label">Facteurs déclencheurs</h3>
+          {% for detail in selected_declaration.score_details.all %}
+          <div class="mt-factor">
+            <div>
+              <p class="small fw-semibold mb-1">{{ detail.critere.nom }}</p>
+              <p class="small text-secondary mb-0">{{ detail.critere.description|default:"Détail du critère non renseigné." }}</p>
+            </div>
+            <strong class="small text-primary text-nowrap">+{{ detail.points_attribues }}</strong>
+          </div>
+          {% empty %}
+          <p class="small text-secondary mb-0">Aucun détail de critère n’est enregistré pour cette déclaration.</p>
+          {% endfor %}
+        </section>
+
+        <section class="pt-4">
+          <h3 class="mt-section-label">Informations du navire</h3>
+          <dl class="row small mb-0">
+            <dt class="col-5 text-secondary fw-normal">Pavillon</dt>
+            <dd class="col-7 fw-semibold">{{ selected_declaration.navire.pavillon_actuel }}</dd>
+            <dt class="col-5 text-secondary fw-normal">Opérateur</dt>
+            <dd class="col-7 fw-semibold">{{ selected_declaration.operateur.nom }}</dd>
+            <dt class="col-5 text-secondary fw-normal">Déclarant</dt>
+            <dd class="col-7 fw-semibold">{{ selected_declaration.declarant.get_full_name|default:selected_declaration.declarant.username }}</dd>
+          </dl>
+        </section>
+      </div>
+
+      <div class="mt-case-route">
+        <section>
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+              <h3 class="h6 fw-semibold mb-1">Route maritime déclarée</h3>
+              <p class="small text-secondary mb-0">Escales dans l’ordre de passage</p>
+            </div>
+            <i class="bi bi-geo-alt text-primary" aria-hidden="true"></i>
+          </div>
+          <div class="mt-route-list">
+            {% for escale in selected_declaration.escales_ordonnees %}
+            <div class="mt-route-step">
+              <span class="mt-route-number">{{ forloop.counter }}</span>
+              <div class="flex-grow-1">
+                <p class="small fw-semibold mb-0">{{ escale.port_escale.nom }}</p>
+                <p class="small text-secondary mb-0">{{ escale.port_escale.pays }}</p>
+              </div>
+              <span class="mt-risk-badge mt-risk-badge-{{ escale.port_escale.niveau_risque }}">{{ escale.port_escale.get_niveau_risque_display }}</span>
+            </div>
+            {% empty %}
+            <p class="small text-secondary mt-3 mb-0">Aucun port d’escale n’est associé à cette déclaration.</p>
+            {% endfor %}
+          </div>
+          <div class="mt-map-placeholder">
+            <i class="bi bi-map me-2" aria-hidden="true"></i>
+            Aperçu cartographique indisponible : coordonnées des ports non renseignées.
+          </div>
+        </section>
+
+        <section class="mt-4">
+          <h3 class="mt-section-label">Détails de la déclaration</h3>
+          <div class="mt-info-grid">
+            <div class="mt-info-card"><span><i class="bi bi-box-seam me-1"></i>Marchandise</span><strong>{{ selected_declaration.type_marchandise }}</strong></div>
+            <div class="mt-info-card"><span><i class="bi bi-boxes me-1"></i>Conteneur</span><strong>{{ selected_declaration.type_conteneur }}</strong></div>
+            <div class="mt-info-card"><span><i class="bi bi-clock me-1"></i>Arrivée prévue</span><strong>{{ selected_declaration.date_arrivee_prevue|date:"d/m/Y H:i" }}</strong></div>
+            <div class="mt-info-card"><span><i class="bi bi-arrow-left-right me-1"></i>Poids / valeur</span><strong>{{ selected_declaration.poids_declare_kg|floatformat:"-2" }} kg · {{ selected_declaration.valeur_declaree|floatformat:"-2" }} <small class="fw-normal text-secondary">devise non renseignée</small></strong></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+  {% else %}
+  <section class="mt-panel mt-empty-detail">
+    <div class="mt-empty-state">
+      <span class="mt-empty-icon"><i class="bi bi-clipboard2-check"></i></span>
+      <h2 class="h6 fw-semibold mt-3">Aucun dossier sélectionné</h2>
+      <p class="small text-secondary mb-0">Une déclaration apparaîtra ici après son enregistrement.</p>
+    </div>
+  </section>
+  {% endif %}
+</div>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'js/maritrust.js' %}"></script>{% endblock %}

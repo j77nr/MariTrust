@@ -10,21 +10,25 @@
   <link href="{% static 'css/maritrust.css' %}" rel="stylesheet">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-light">
-  <nav class="navbar navbar-expand navbar-dark navbar-marine">
-    <div class="container">
-      <a class="navbar-brand fw-semibold" href="{% url 'accueil' %}"><i class="bi bi-shield-check me-2"></i>MariTrust</a>
+<body>
+  <nav class="navbar navbar-expand navbar-light mt-navbar sticky-top">
+    <div class="container-fluid mt-navbar-inner">
+      <a class="navbar-brand mt-brand text-decoration-none" href="{% url 'accueil' %}">
+        <span class="mt-brand-mark"><i class="bi bi-anchor"></i></span>
+        MariTrust
+      </a>
       {% if user.is_authenticated %}
-      <div class="ms-auto d-flex align-items-center text-white">
-        <span class="me-3 small">{{ user.get_full_name|default:user.username }} · {{ user.get_role_display }}</span>
-        <form method="post" action="{% url 'logout' %}">{% csrf_token %}
-          <button class="btn btn-outline-light btn-sm">Déconnexion</button>
+      <span class="d-none d-sm-inline small text-secondary ms-2">{{ user.get_role_display }}</span>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="d-none d-md-inline small fw-semibold">{{ user.get_full_name|default:user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" class="m-0">{% csrf_token %}
+          <button class="btn btn-outline-secondary btn-sm" aria-label="Déconnexion"><i class="bi bi-box-arrow-right me-sm-1"></i><span class="d-none d-sm-inline">Déconnexion</span></button>
         </form>
       </div>
       {% endif %}
     </div>
   </nav>
-  <main class="container py-4">
+  <main class="container-fluid mt-main">
     {% block contenu %}{% endblock %}
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
