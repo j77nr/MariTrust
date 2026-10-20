@@ -88,6 +88,17 @@ class DeclarationDeclarantTests(TestCase):
         self.assertNotContains(response, "Élevé")
         self.assertNotContains(response, "score")
 
+    def test_agent_ne_peut_pas_acceder_aux_routes_du_declarant(self):
+        agent = Utilisateur.objects.create_user(
+            username="agent-route-test", password="Agent-test-2026", role="agent"
+        )
+        self.client.force_login(agent)
+
+        for url_name in ("declarations:creer_declaration", "declarations:mes_declarations"):
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name))
+                self.assertEqual(response.status_code, 403)
+
     def test_declarant_sans_societe_est_refuse(self):
         sans_societe = Utilisateur.objects.create_user(
             username="sans-societe", password="secret", role="declarant"

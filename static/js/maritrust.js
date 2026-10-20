@@ -34,3 +34,15 @@ document.addEventListener("input", (event) => {
   const emptyMessage = document.querySelector("[data-agent-no-results]");
   if (emptyMessage) emptyMessage.classList.toggle("d-none", visibleRows !== 0);
 });
+
+document.addEventListener("click", (event) => {
+  const target = event.target instanceof Element ? event.target : null;
+  const addPortButton = target?.closest("[data-add-port]");
+  if (!addPortButton) return;
+
+  const row = document.querySelector("[data-port-row][hidden]");
+  if (row) row.hidden = false;
+  if (!document.querySelector("[data-port-row][hidden]")) {
+    addPortButton.hidden = true;
+  }
+});

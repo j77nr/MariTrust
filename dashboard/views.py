@@ -9,6 +9,20 @@ class EspaceDeclarant(RoleRequiredMixin, TemplateView):
     roles = ["declarant"]
     template_name = "dashboard/declarant.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        declarations = Declaration.objects.filter(declarant=self.request.user).select_related(
+            "navire", "operateur"
+        )
+        context.update(
+            declarations_recentes=declarations[:5],
+            nombre_declarations=declarations.count(),
+            declarations_en_attente=declarations.filter(
+                statut_traitement=Declaration.StatutTraitement.EN_ATTENTE
+            ).count(),
+        )
+        return context
+
 
 class EspaceAgent(RoleRequiredMixin, TemplateView):
     roles = ["agent", "admin"]

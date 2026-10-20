@@ -462,6 +462,119 @@ textarea {
   align-content: center;
 }
 
+.mt-company-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--mt-border);
+  border-radius: var(--mt-radius);
+  background: var(--mt-card);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.mt-stat-card {
+  padding: 1rem 1.25rem;
+}
+
+.mt-stat-card > span,
+.mt-stat-card > small {
+  display: block;
+  color: var(--mt-muted-foreground);
+  font-size: 0.75rem;
+}
+
+.mt-stat-card > strong {
+  display: block;
+  margin: 0.5rem 0 0.15rem;
+  font-size: 1.5rem;
+  font-weight: 650;
+}
+
+.mt-page-tabs {
+  display: flex;
+  width: fit-content;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--mt-border);
+  border-radius: var(--mt-radius);
+  background: var(--mt-card);
+}
+
+.mt-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--mt-border);
+}
+
+.mt-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--mt-border);
+}
+
+.mt-recent-row:last-child {
+  border-bottom: 0;
+}
+
+.mt-recent-icon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--mt-primary);
+  background: var(--mt-secondary);
+}
+
+.mt-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: var(--mt-secondary);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.mt-status-en_attente {
+  color: var(--mt-primary);
+}
+
+.mt-status-en_cours {
+  color: var(--mt-risk-medium);
+  background: var(--mt-risk-medium-soft);
+}
+
+.mt-status-traite {
+  color: var(--mt-risk-low);
+  background: var(--mt-risk-low-soft);
+}
+
+.mt-table > :not(caption) > * > * {
+  padding: 0.95rem 1.1rem;
+  border-bottom-color: var(--mt-border);
+}
+
+.mt-table thead th {
+  color: var(--mt-muted-foreground);
+  background: var(--mt-secondary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mt-port-row[hidden] {
+  display: none;
+}
+
 [data-agent-row][hidden] {
   display: none;
 }

@@ -1,8 +1,70 @@
 {% extends "base.html" %}
+{% load static %}
 {% block titre %}Espace déclarant · MariTrust{% endblock %}
 {% block contenu %}
-<h1 class="h3">Espace déclarant</h1>
-<p class="text-muted">Soumettez vos déclarations anticipées et suivez leur traitement.</p>
-<a class="btn btn-primary me-2" href="{% url 'declarations:creer_declaration' %}">Nouvelle déclaration</a>
-<a class="btn btn-outline-primary" href="{% url 'declarations:mes_declarations' %}">Mes déclarations</a>
+<div class="mt-page-heading">
+  <div>
+    <div class="small text-secondary mb-2"><i class="bi bi-shield-check me-1"></i> Espace sécurisé MariTrust</div>
+    <h1 class="h2 fw-semibold mb-1">Espace déclarant</h1>
+    <p class="text-secondary mb-0">Déposez et suivez vos déclarations anticipées.</p>
+  </div>
+  {% if user.societe %}
+  <span class="mt-company-label"><i class="bi bi-building me-2" aria-hidden="true"></i>{{ user.societe.nom }}</span>
+  {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <section class="mt-panel mt-stat-card">
+      <span>Mes déclarations</span>
+      <strong>{{ nombre_declarations }}</strong>
+      <small>total des dossiers transmis</small>
+    </section>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <section class="mt-panel mt-stat-card">
+      <span>En attente</span>
+      <strong>{{ declarations_en_attente }}</strong>
+      <small>dossiers reçus par les services</small>
+    </section>
+  </div>
+</div>
+
+<nav class="mt-page-tabs mb-4" aria-label="Espace déclarant">
+  <a class="btn mt-btn-primary" href="{% url 'declarations:creer_declaration' %}">
+    <i class="bi bi-file-earmark-plus me-2" aria-hidden="true"></i>Nouvelle déclaration
+  </a>
+  <a class="btn btn-light" href="{% url 'declarations:mes_declarations' %}">
+    <i class="bi bi-ship me-2" aria-hidden="true"></i>Mes déclarations
+  </a>
+</nav>
+
+<section class="mt-panel mt-recent-list" aria-labelledby="recent-declarations-title">
+  <header class="mt-panel-header">
+    <div>
+      <h2 class="h6 fw-semibold mb-1" id="recent-declarations-title">Déclarations récentes</h2>
+      <p class="small text-secondary mb-0">Suivez l’avancement de vos dossiers.</p>
+    </div>
+    {% if nombre_declarations %}
+    <a class="small fw-semibold text-decoration-none" href="{% url 'declarations:mes_declarations' %}">Tout afficher <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    {% endif %}
+  </header>
+  {% for declaration in declarations_recentes %}
+  <div class="mt-recent-row">
+    <span class="mt-recent-icon"><i class="bi bi-ship" aria-hidden="true"></i></span>
+    <div class="flex-grow-1 min-w-0">
+      <p class="small fw-semibold text-truncate mb-1">{{ declaration.navire.nom }} · {{ declaration.type_marchandise }}</p>
+      <p class="small text-secondary mb-0">Déposée le {{ declaration.date_declaration|date:"d/m/Y H:i" }}</p>
+    </div>
+    <span class="mt-status-badge mt-status-{{ declaration.statut_traitement }}">{{ declaration.get_statut_traitement_display }}</span>
+  </div>
+  {% empty %}
+  <div class="mt-empty-state">
+    <span class="mt-empty-icon"><i class="bi bi-file-earmark-text"></i></span>
+    <h3 class="h6 fw-semibold mt-3">Aucune déclaration pour le moment</h3>
+    <p class="small text-secondary mb-3">Déposez votre première déclaration anticipée de cargaison.</p>
+    <a class="btn mt-btn-primary btn-sm" href="{% url 'declarations:creer_declaration' %}">Créer une déclaration</a>
+  </div>
+  {% endfor %}
+</section>
 {% endblock %}

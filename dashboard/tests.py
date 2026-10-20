@@ -91,3 +91,61 @@ class EspaceAgentTests(TestCase):
         self.assertContains(response, "coordonnées des ports non renseignées")
         self.assertEqual(response.context["selected_declaration"], declaration)
         self.assertNotEqual(response.context["selected_declaration"], declaration_recente)
+
+
+class EspaceDeclarantTests(TestCase):
+    def setUp(self):
+        self.declarant = Utilisateur.objects.create_user(
+            username="declarant-espace", password="Declarant-test-2026", role="declarant"
+        )
+        self.agent = Utilisateur.objects.create_user(
+            username="agent-espace", password="Agent-test-2026", role="agent"
+        )
+        self.admin = Utilisateur.objects.create_user(
+            username="admin-espace", password="Admin-test-2026", role="admin"
+        )
+
+    def test_declarant_peut_acceder_a_son_espace_sans_voir_le_score(self):
+        operateur = Operateur.objects.create(nom="Consignation espace", statut="connu")
+        self.declarant.societe = operateur
+        self.declarant.save(update_fields=["societe"])
+        navire = Navire.objects.create(
+            nom="Aster", numero_imo="9074729", pavillon_actuel="TG"
+        )
+        Declaration.objects.create(
+            declarant=self.declarant,
+            navire=navire,
+            operateur=operateur,
+            type_marchandise="Cacao",
+            poids_declare_kg=1000,
+            type_conteneur="20 pieds",
+            valeur_declaree=2500,
+            moyen_paiement="virement",
+            date_arrivee_prevue=timezone.now() + timedelta(days=2),
+            score=73,
+            niveau_risque="eleve",
+        )
+        self.client.force_login(self.declarant)
+
+        response = self.client.get(reverse("espace_declarant"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Aster")
+        self.assertContains(response, "Cacao")
+        self.assertContains(response, "Mes déclarations")
+        self.assertNotContains(response, "score")
+        self.assertNotContains(response, "73")
+        self.assertNotContains(response, "Élevé")
+
+    def test_agent_et_admin_ne_peuvent_pas_acceder_a_l_espace_declarant(self):
+        for utilisateur in (self.agent, self.admin):
+            with self.subTest(role=utilisateur.role):
+                self.client.force_login(utilisateur)
+                response = self.client.get(reverse("espace_declarant"))
+                self.assertEqual(response.status_code, 403)
+
+    def test_visiteur_non_connecte_est_redirige_vers_la_connexion(self):
+        response = self.client.get(reverse("espace_declarant"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response["Location"])

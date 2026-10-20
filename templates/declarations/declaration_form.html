@@ -1,67 +1,101 @@
 {% extends "base.html" %}
+{% load static %}
 {% block titre %}Nouvelle déclaration · MariTrust{% endblock %}
 {% block contenu %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mt-page-heading">
   <div>
-    <h1 class="h3 mb-1">Nouvelle déclaration</h1>
-    <p class="text-muted mb-0">Déclaration déposée au nom de <strong>{{ societe.nom }}</strong>.</p>
+    <div class="small text-secondary mb-2"><a class="text-decoration-none" href="{% url 'espace_declarant' %}">Espace déclarant</a> <i class="bi bi-chevron-right mx-1" aria-hidden="true"></i> Nouvelle déclaration</div>
+    <h1 class="h2 fw-semibold mb-1">Nouvelle déclaration</h1>
+    <p class="text-secondary mb-0">Déposée au nom de <strong>{{ societe.nom }}</strong>.</p>
   </div>
-  <a class="btn btn-outline-secondary" href="{% url 'declarations:mes_declarations' %}">Mes déclarations</a>
+  <a class="btn btn-outline-secondary" href="{% url 'declarations:mes_declarations' %}"><i class="bi bi-list-ul me-1" aria-hidden="true"></i>Mes déclarations</a>
 </div>
+
+<nav class="mt-page-tabs mb-4" aria-label="Espace déclarant">
+  <a class="btn mt-btn-primary" href="{% url 'declarations:creer_declaration' %}"><i class="bi bi-file-earmark-plus me-2" aria-hidden="true"></i>Nouvelle déclaration</a>
+  <a class="btn btn-light" href="{% url 'declarations:mes_declarations' %}"><i class="bi bi-ship me-2" aria-hidden="true"></i>Mes déclarations</a>
+</nav>
+
+{% if messages %}{% for message in messages %}<div class="alert alert-info" role="status">{{ message }}</div>{% endfor %}{% endif %}
+{% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
 <form method="post" novalidate>
   {% csrf_token %}
-  {% if messages %}{% for message in messages %}<div class="alert alert-info py-2 mb-3">{{ message }}</div>{% endfor %}{% endif %}
-  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-  <div class="card shadow-sm mb-4"><div class="card-body">
-    <h2 class="h5 mb-3">Navire</h2>
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label" for="id_navire_imo">Numéro IMO (7 chiffres)</label>
-        {{ form.navire_imo }}
-        {% for error in form.navire_imo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+  <section class="mt-panel mb-4">
+    <header class="mt-panel-header">
+      <div>
+        <h2 class="h6 fw-semibold mb-1">Navire</h2>
+        <p class="small text-secondary mb-0">Renseignez l’identifiant du navire et son pavillon.</p>
       </div>
-      <div class="col-md-6">
-        <label class="form-label" for="id_navire_nom">Nom du navire</label>
-        {{ form.navire_nom }}
-        {% for error in form.navire_nom.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-      </div>
-      <div class="col-md-6">
-        <label class="form-label" for="id_navire_pavillon">Pavillon</label>
-        {{ form.navire_pavillon }}
-        <div class="form-text small">Requis seulement si le navire est nouveau.</div>
-      </div>
-    </div>
-  </div></div>
-  <div class="card shadow-sm mb-4"><div class="card-body">
-    <h2 class="h5 mb-3">Cargaison et arrivée</h2>
-    <div class="row g-3">
+      <i class="bi bi-ship text-primary fs-5" aria-hidden="true"></i>
+    </header>
+    <div class="row g-3 p-4">
       {% for field in form %}
-      {% if field.name not in "navire_nom,navire_imo,navire_pavillon" %}
+      {% if field.name in "navire_imo,navire_nom,navire_pavillon" %}
       <div class="col-md-6">
-        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <label class="form-label login-field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
         {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
       </div>
       {% endif %}
       {% endfor %}
     </div>
-  </div></div>
-  <div class="card shadow-sm mb-4"><div class="card-body">
-    <h2 class="h5 mb-1">Ports d'escale</h2>
-    <p class="text-muted small">Renseignez jusqu'à 10 ports, dans l'ordre de passage. Les lignes vides sont ignorées.</p>
-    {{ formset.management_form }}
-    {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
-    {% for escale_form in formset %}
-    <div class="row align-items-center mb-2">
-      <div class="col-auto text-muted" style="width: 3rem">{{ forloop.counter }}.</div>
-      <div class="col-md-7">
-        <label class="visually-hidden" for="{{ escale_form.port_escale.id_for_label }}">Port d'escale {{ forloop.counter }}</label>
-        {{ escale_form.port_escale }}
-        {% for error in escale_form.port_escale.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+  </section>
+
+  <section class="mt-panel mb-4">
+    <header class="mt-panel-header">
+      <div>
+        <h2 class="h6 fw-semibold mb-1">Cargaison et arrivée</h2>
+        <p class="small text-secondary mb-0">Les champs marqués d’un astérisque sont obligatoires.</p>
       </div>
+      <i class="bi bi-box-seam text-primary fs-5" aria-hidden="true"></i>
+    </header>
+    <div class="row g-3 p-4">
+      {% for field in form %}
+      {% if field.name not in "navire_nom,navire_imo,navire_pavillon" %}
+      <div class="col-md-6 col-xl-4">
+        <label class="form-label login-field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+        {{ field }}
+        {% if field.name == "valeur_declaree" %}<div class="form-text">La devise n’est pas enregistrée pour le moment.</div>{% endif %}
+        {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      {% endif %}
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div></div>
-  <button class="btn btn-primary">Enregistrer la déclaration</button>
+  </section>
+
+  <section class="mt-panel mb-4">
+    <header class="mt-panel-header">
+      <div>
+        <h2 class="h6 fw-semibold mb-1">Ports d’escale</h2>
+        <p class="small text-secondary mb-0">Ajoutez jusqu’à 10 ports, dans l’ordre de passage. Les lignes vides sont ignorées.</p>
+      </div>
+      <i class="bi bi-geo-alt text-primary fs-5" aria-hidden="true"></i>
+    </header>
+    <div class="p-4">
+      {{ formset.management_form }}
+      {% if formset.non_form_errors %}<div class="alert alert-danger" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
+      <div data-port-rows>
+        {% for escale_form in formset %}
+        <div class="row align-items-start g-2 mb-2" data-port-row{% if not forloop.first and not escale_form.port_escale.errors and not formset.non_form_errors %} hidden{% endif %}>
+          <div class="col-auto pt-2 text-secondary" style="width: 2.5rem">{{ forloop.counter }}.</div>
+          <div class="col-md-8">
+            <label class="visually-hidden" for="{{ escale_form.port_escale.id_for_label }}">Port d’escale {{ forloop.counter }}</label>
+            {{ escale_form.port_escale }}
+            {% for error in escale_form.port_escale.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button class="btn btn-outline-secondary btn-sm mt-2" type="button" data-add-port>
+        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Ajouter une escale
+      </button>
+    </div>
+  </section>
+
+  <div class="d-flex justify-content-end">
+    <button class="btn mt-btn-primary px-4" type="submit"><i class="bi bi-send me-2" aria-hidden="true"></i>Transmettre la déclaration</button>
+  </div>
 </form>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'js/maritrust.js' %}"></script>{% endblock %}

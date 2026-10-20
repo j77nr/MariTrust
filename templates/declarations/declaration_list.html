@@ -1,26 +1,49 @@
 {% extends "base.html" %}
 {% block titre %}Mes déclarations · MariTrust{% endblock %}
 {% block contenu %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 mb-0">Mes déclarations</h1>
-  <a class="btn btn-primary" href="{% url 'declarations:creer_declaration' %}">Nouvelle déclaration</a>
+<div class="mt-page-heading">
+  <div>
+    <div class="small text-secondary mb-2"><a class="text-decoration-none" href="{% url 'espace_declarant' %}">Espace déclarant</a> <i class="bi bi-chevron-right mx-1" aria-hidden="true"></i> Mes déclarations</div>
+    <h1 class="h2 fw-semibold mb-1">Mes déclarations</h1>
+    <p class="text-secondary mb-0">Consultez les déclarations transmises et leur état de traitement.</p>
+  </div>
+  <a class="btn mt-btn-primary" href="{% url 'declarations:creer_declaration' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nouvelle déclaration</a>
 </div>
-<div class="card shadow-sm"><div class="table-responsive">
-  <table class="table table-hover mb-0">
-    <thead><tr><th>Déposée le</th><th>Navire</th><th>Marchandise</th><th>Arrivée prévue</th><th>Statut</th></tr></thead>
-    <tbody>
-      {% for declaration in declarations %}
-      <tr>
-        <td>{{ declaration.date_declaration|date:"d/m/Y H:i" }}</td>
-        <td>{{ declaration.navire.nom }}</td>
-        <td>{{ declaration.type_marchandise }}</td>
-        <td>{{ declaration.date_arrivee_prevue|date:"d/m/Y H:i" }}</td>
-        <td>{{ declaration.get_statut_traitement_display }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5" class="text-center text-muted py-4">Vous n'avez encore déposé aucune déclaration.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div></div>
+
+<nav class="mt-page-tabs mb-4" aria-label="Espace déclarant">
+  <a class="btn btn-light" href="{% url 'declarations:creer_declaration' %}"><i class="bi bi-file-earmark-plus me-2" aria-hidden="true"></i>Nouvelle déclaration</a>
+  <a class="btn mt-btn-primary" href="{% url 'declarations:mes_declarations' %}"><i class="bi bi-ship me-2" aria-hidden="true"></i>Mes déclarations</a>
+</nav>
+
+<section class="mt-panel mt-recent-list" aria-label="Liste de mes déclarations">
+  <div class="table-responsive">
+    <table class="table mt-table align-middle mb-0">
+      <thead>
+        <tr>
+          <th scope="col">Référence</th>
+          <th scope="col">Navire</th>
+          <th scope="col">Marchandise</th>
+          <th scope="col">Arrivée prévue</th>
+          <th scope="col">Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for declaration in declarations %}
+        <tr>
+          <td class="small text-secondary">Référence indisponible</td>
+          <td class="fw-semibold">{{ declaration.navire.nom }}</td>
+          <td class="text-secondary">{{ declaration.type_marchandise }}</td>
+          <td><time datetime="{{ declaration.date_arrivee_prevue|date:'c' }}">{{ declaration.date_arrivee_prevue|date:"d/m/Y H:i" }}</time></td>
+          <td><span class="mt-status-badge mt-status-{{ declaration.statut_traitement }}">{{ declaration.get_statut_traitement_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="py-5 text-center">
+          <span class="mt-empty-icon mx-auto"><i class="bi bi-inbox"></i></span>
+          <p class="small text-secondary mt-3 mb-0">Vous n’avez encore déposé aucune déclaration.</p>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}
