@@ -1,0 +1,178 @@
+:root {
+  --mt-radius: 0.5rem;
+  --mt-space-1: 0.25rem;
+  --mt-space-2: 0.5rem;
+  --mt-space-3: 0.75rem;
+  --mt-space-4: 1rem;
+  --mt-space-5: 1.25rem;
+  --mt-space-6: 1.5rem;
+  --mt-space-8: 2rem;
+  --mt-space-10: 2.5rem;
+  --mt-space-12: 3rem;
+  --mt-background: oklch(0.982 0.004 247);
+  --mt-foreground: oklch(0.22 0.03 252);
+  --mt-card: oklch(1 0 0);
+  --mt-primary: oklch(0.34 0.071 252);
+  --mt-primary-foreground: oklch(0.984 0.003 247.858);
+  --mt-secondary: oklch(0.95 0.012 248);
+  --mt-muted-foreground: oklch(0.5 0.026 252);
+  --mt-accent: oklch(0.94 0.018 248);
+  --mt-border: oklch(0.89 0.015 250);
+  --mt-input: oklch(0.86 0.019 250);
+  --mt-ring: oklch(0.48 0.09 252);
+  --mt-risk-low: oklch(0.49 0.15 153);
+  --mt-risk-low-soft: oklch(0.95 0.045 153);
+  --mt-risk-medium: oklch(0.64 0.16 67);
+  --mt-risk-medium-soft: oklch(0.96 0.055 78);
+  --mt-risk-high: oklch(0.55 0.21 28);
+  --mt-risk-high-soft: oklch(0.95 0.04 25);
+
+  --marine: var(--mt-primary);
+  --bs-body-bg: var(--mt-background);
+  --bs-body-color: var(--mt-foreground);
+  --bs-border-color: var(--mt-border);
+  --bs-primary: var(--mt-primary);
+  --bs-primary-rgb: 26, 55, 91;
+  --bs-border-radius: var(--mt-radius);
+  --bs-border-radius-sm: calc(var(--mt-radius) - 0.25rem);
+  --bs-border-radius-lg: calc(var(--mt-radius) + 0.25rem);
+}
+
+body {
+  min-width: 320px;
+  background-color: var(--mt-background);
+  color: var(--mt-foreground);
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  letter-spacing: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  letter-spacing: 0;
+}
+
+.navbar-marine {
+  background: var(--marine);
+}
+
+.risque-faible {
+  color: var(--mt-risk-low);
+}
+
+.risque-moyen {
+  color: var(--mt-risk-medium);
+}
+
+.risque-eleve {
+  color: var(--mt-risk-high);
+}
+
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.9fr) minmax(25rem, 1.1fr);
+  background: var(--mt-secondary);
+}
+
+.login-aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2rem, 5vw, 4.5rem);
+  color: var(--mt-primary-foreground);
+  background: var(--mt-primary);
+}
+
+.login-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mt-space-6);
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 28rem;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  border: 1px solid var(--mt-border);
+  border-radius: var(--mt-radius);
+  background: var(--mt-card);
+  box-shadow: 0 1rem 2.5rem rgb(27 49 76 / 8%);
+}
+
+.mt-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mt-space-3);
+  color: var(--mt-primary);
+  font-size: 1.125rem;
+  font-weight: 650;
+}
+
+.mt-brand-mark {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: calc(var(--mt-radius) - 0.125rem);
+  color: var(--mt-primary-foreground);
+  background: var(--mt-primary);
+}
+
+.login-aside .mt-brand {
+  color: var(--mt-primary-foreground);
+}
+
+.login-aside .mt-brand-mark {
+  color: var(--mt-primary-foreground);
+  background: rgb(255 255 255 / 12%);
+}
+
+.login-field-label {
+  margin-bottom: var(--mt-space-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.login-input {
+  min-height: 2.75rem;
+}
+
+.mt-btn-primary {
+  --bs-btn-bg: var(--mt-primary);
+  --bs-btn-border-color: var(--mt-primary);
+  --bs-btn-hover-bg: oklch(0.29 0.071 252);
+  --bs-btn-hover-border-color: oklch(0.29 0.071 252);
+  --bs-btn-active-bg: oklch(0.27 0.071 252);
+  --bs-btn-active-border-color: oklch(0.27 0.071 252);
+  --bs-btn-color: var(--mt-primary-foreground);
+  --bs-btn-hover-color: var(--mt-primary-foreground);
+}
+
+@media (max-width: 767.98px) {
+  .login-shell {
+    display: block;
+  }
+
+  .login-aside {
+    display: none;
+  }
+
+  .login-main {
+    min-height: 100vh;
+    padding: var(--mt-space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
