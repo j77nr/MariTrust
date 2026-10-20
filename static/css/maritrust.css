@@ -575,6 +575,117 @@ textarea {
   display: none;
 }
 
+[data-port-row][hidden] {
+  display: none;
+}
+
+.mt-admin-date {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--mt-border);
+  border-radius: var(--mt-radius);
+  background: var(--mt-card);
+  color: var(--mt-muted-foreground);
+  font-size: 0.75rem;
+}
+
+.mt-admin-chart {
+  min-height: 17rem;
+}
+
+.mt-trend-chart {
+  display: grid;
+  height: 12rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.mt-trend-day {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 1.25rem minmax(0, 1fr) 1.25rem;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.mt-trend-total,
+.mt-trend-label {
+  color: var(--mt-muted-foreground);
+  font-size: 0.65rem;
+}
+
+.mt-trend-track {
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  background: var(--mt-secondary);
+}
+
+.mt-trend-track > span {
+  width: min(1.75rem, 70%);
+  min-height: 0;
+  border-radius: 0.25rem 0.25rem 0 0;
+  background: var(--mt-primary);
+}
+
+.mt-risk-chart {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem 1.25rem;
+}
+
+.mt-risk-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.mt-risk-dot-faible {
+  background: var(--mt-risk-low);
+}
+
+.mt-risk-dot-moyen {
+  background: var(--mt-risk-medium);
+}
+
+.mt-risk-dot-eleve {
+  background: var(--mt-risk-high);
+}
+
+.mt-risk-progress {
+  height: 0.45rem;
+  background: var(--mt-secondary);
+}
+
+.mt-risk-progress-faible {
+  background: var(--mt-risk-low);
+}
+
+.mt-risk-progress-moyen {
+  background: var(--mt-risk-medium);
+}
+
+.mt-risk-progress-eleve {
+  background: var(--mt-risk-high);
+}
+
+.mt-weight-input {
+  width: 5.25rem;
+}
+
+.mt-role-chip {
+  display: inline-block;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.25rem;
+  color: var(--mt-primary);
+  background: var(--mt-secondary);
+  font-size: 0.7rem;
+}
+
 [data-agent-row][hidden] {
   display: none;
 }

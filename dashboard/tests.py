@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from accounts.models import Utilisateur
 from declarations.models import Declaration, Navire, Operateur, PortEscale
+from scoring.models import Critere
 
 
 class EspaceAgentTests(TestCase):
@@ -146,6 +147,66 @@ class EspaceDeclarantTests(TestCase):
 
     def test_visiteur_non_connecte_est_redirige_vers_la_connexion(self):
         response = self.client.get(reverse("espace_declarant"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response["Location"])
+
+
+class EspaceAdminTests(TestCase):
+    def setUp(self):
+        self.admin = Utilisateur.objects.create_user(
+            username="admin-dashboard", password="Admin-test-2026", role="admin"
+        )
+        self.agent = Utilisateur.objects.create_user(
+            username="agent-dashboard", password="Agent-test-2026", role="agent"
+        )
+        self.declarant = Utilisateur.objects.create_user(
+            username="declarant-dashboard", password="Declarant-test-2026", role="declarant"
+        )
+        self.critere = Critere.objects.create(
+            code="poids_test",
+            nom="Poids incohérent",
+            categorie="cargaison",
+            poids=25,
+            description="Poids supérieur à la capacité déclarée.",
+        )
+
+    def test_administrateur_peut_acceder_aux_indicateurs_et_modifier_un_critere(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("espace_admin"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Déclarations totales")
+        self.assertContains(response, "Poids incohérent")
+        self.assertContains(response, "Poids supérieur à la capacité déclarée.")
+
+        response = self.client.post(
+            reverse("espace_admin"),
+            {
+                "criteres-TOTAL_FORMS": "1",
+                "criteres-INITIAL_FORMS": "1",
+                "criteres-MIN_NUM_FORMS": "0",
+                "criteres-MAX_NUM_FORMS": "1000",
+                "criteres-0-id": str(self.critere.pk),
+                "criteres-0-poids": "42",
+                "criteres-0-actif": "on",
+            },
+        )
+
+        self.assertRedirects(response, reverse("espace_admin"))
+        self.critere.refresh_from_db()
+        self.assertEqual(self.critere.poids, 42)
+        self.assertTrue(self.critere.actif)
+
+    def test_agent_et_declarant_ne_peuvent_pas_acceder_a_l_administration(self):
+        for utilisateur in (self.agent, self.declarant):
+            with self.subTest(role=utilisateur.role):
+                self.client.force_login(utilisateur)
+                response = self.client.get(reverse("espace_admin"))
+                self.assertEqual(response.status_code, 403)
+
+    def test_visiteur_non_connecte_est_redirige_vers_la_connexion(self):
+        response = self.client.get(reverse("espace_admin"))
 
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("login"), response["Location"])

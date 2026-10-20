@@ -1,6 +1,177 @@
 {% extends "base.html" %}
 {% block titre %}Administration · MariTrust{% endblock %}
 {% block contenu %}
-<h1 class="h3">Administration</h1>
-<p class="text-muted">Ici l'administrateur gérera les critères de scoring et les comptes (semaine 6).</p>
+<div class="mt-page-heading">
+  <div>
+    <div class="small text-secondary mb-2"><i class="bi bi-shield-check me-1"></i> Espace d’administration MariTrust</div>
+    <h1 class="h2 fw-semibold mb-1">Vue d’ensemble</h1>
+    <p class="text-secondary mb-0">Activité et configuration des critères de risque.</p>
+  </div>
+  <span class="mt-admin-date"><i class="bi bi-calendar3 me-2" aria-hidden="true"></i>{{ date_du_jour|date:"d/m/Y" }}</span>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-success" role="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <section class="mt-panel mt-stat-card">
+      <div class="d-flex justify-content-between"><span>Déclarations totales</span><i class="bi bi-file-earmark-check text-primary"></i></div>
+      <strong>{{ declarations_total }}</strong>
+      <small>tous dossiers enregistrés</small>
+    </section>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <section class="mt-panel mt-stat-card">
+      <div class="d-flex justify-content-between"><span>Risque élevé · 30 jours</span><i class="bi bi-shield-exclamation text-danger"></i></div>
+      <strong>{{ risques_eleves }}</strong>
+      <small>{{ pourcentage_risque_eleve|floatformat:1 }} % des dossiers sur 30 jours</small>
+    </section>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <section class="mt-panel mt-stat-card">
+      <div class="d-flex justify-content-between"><span>Temps moyen</span><i class="bi bi-clock-history text-primary"></i></div>
+      <strong>—</strong>
+      <small>durée de traitement non suivie</small>
+    </section>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <section class="mt-panel mt-stat-card">
+      <div class="d-flex justify-content-between"><span>Utilisateurs actifs</span><i class="bi bi-people text-primary"></i></div>
+      <strong>{{ utilisateurs_actifs }}</strong>
+      <small>sur {{ utilisateurs_total }} compte{{ utilisateurs_total|pluralize }}</small>
+    </section>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-7">
+    <section class="mt-panel mt-admin-chart h-100" aria-labelledby="trend-title">
+      <header class="mt-panel-header">
+        <div>
+          <h2 class="h6 fw-semibold mb-1" id="trend-title">Tendance des déclarations</h2>
+          <p class="small text-secondary mb-0">Volume reçu sur les 7 derniers jours</p>
+        </div>
+        <i class="bi bi-graph-up text-primary" aria-hidden="true"></i>
+      </header>
+      <div class="mt-trend-chart" role="img" aria-label="Nombre de déclarations par jour sur les sept derniers jours">
+        {% for point in tendance %}
+        <div class="mt-trend-day" aria-label="{{ point.jour|date:'l d F' }} : {{ point.total }} déclaration{{ point.total|pluralize }}">
+          <span class="mt-trend-total">{{ point.total }}</span>
+          <div class="mt-trend-track"><span style="height: {{ point.hauteur }}%"></span></div>
+          <span class="mt-trend-label">{{ point.jour|date:"D" }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="mt-panel mt-admin-chart h-100" aria-labelledby="risk-title">
+      <header class="mt-panel-header">
+        <div>
+          <h2 class="h6 fw-semibold mb-1" id="risk-title">Répartition du risque</h2>
+          <p class="small text-secondary mb-0">{{ declaration_risque_total }} déclaration{{ declaration_risque_total|pluralize }} sur 30 jours</p>
+        </div>
+        <i class="bi bi-pie-chart text-primary" aria-hidden="true"></i>
+      </header>
+      <div class="mt-risk-chart">
+        {% for item in repartition_risque %}
+        <div class="mt-risk-chart-row">
+          <div class="d-flex justify-content-between small mb-2">
+            <span><i class="mt-risk-dot mt-risk-dot-{{ item.code }} me-2"></i>{{ item.label }}</span>
+            <strong>{{ item.total }} <span class="text-secondary fw-normal">· {{ item.pourcentage }}%</span></strong>
+          </div>
+          <div class="progress mt-risk-progress" role="progressbar" aria-label="Risque {{ item.label }}" aria-valuenow="{{ item.pourcentage }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar mt-risk-progress-{{ item.code }}" style="width: {{ item.pourcentage }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+
+<section class="mt-panel mb-4" aria-labelledby="criteria-title">
+  <header class="mt-panel-header">
+    <div>
+      <h2 class="h6 fw-semibold mb-1" id="criteria-title">Critères de scoring</h2>
+      <p class="small text-secondary mb-0">Ajustez les poids (0 à 100) et l’activation des règles.</p>
+    </div>
+    <i class="bi bi-sliders text-primary fs-5" aria-hidden="true"></i>
+  </header>
+  <form method="post">
+    {% csrf_token %}
+    {{ critere_formset.management_form }}
+    {% if critere_formset.non_form_errors %}<div class="alert alert-danger m-3" role="alert">{{ critere_formset.non_form_errors }}</div>{% endif %}
+    <div class="table-responsive">
+      <table class="table mt-table align-middle mb-0">
+        <thead>
+          <tr><th scope="col">Critère</th><th scope="col">Catégorie</th><th scope="col">Poids</th><th scope="col" class="text-end">Actif</th></tr>
+        </thead>
+        <tbody>
+          {% for form in critere_formset %}
+          <tr>
+            <td>
+              {{ form.id }}
+              <span class="d-block fw-semibold">{{ form.instance.nom }}</span>
+              <span class="small text-secondary">{{ form.instance.description|default:"Description non renseignée." }}</span>
+              {% for error in form.non_field_errors %}<span class="d-block small text-danger">{{ error }}</span>{% endfor %}
+            </td>
+            <td class="small text-secondary">{{ form.instance.get_categorie_display }}</td>
+            <td>
+              {{ form.poids }}
+              {% for error in form.poids.errors %}<span class="d-block small text-danger">{{ error }}</span>{% endfor %}
+            </td>
+            <td class="text-end">
+              <div class="form-check form-switch d-inline-flex">
+                {{ form.actif }}
+                {% for error in form.actif.errors %}<span class="small text-danger ms-2">{{ error }}</span>{% endfor %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="py-4 text-center text-secondary">Aucun critère de scoring n’est configuré.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if critere_formset.forms %}
+    <div class="d-flex justify-content-end border-top p-3">
+      <button class="btn mt-btn-primary" type="submit"><i class="bi bi-check2 me-1" aria-hidden="true"></i>Enregistrer les critères</button>
+    </div>
+    {% endif %}
+  </form>
+</section>
+
+<section class="mt-panel" aria-labelledby="users-title">
+  <header class="mt-panel-header">
+    <div>
+      <h2 class="h6 fw-semibold mb-1" id="users-title">Utilisateurs</h2>
+      <p class="small text-secondary mb-0">Comptes et rôles enregistrés dans MariTrust.</p>
+    </div>
+    <i class="bi bi-person-gear text-primary fs-5" aria-hidden="true"></i>
+  </header>
+  <div class="table-responsive">
+    <table class="table mt-table align-middle mb-0">
+      <thead>
+        <tr><th scope="col">Utilisateur</th><th scope="col">Adresse e-mail</th><th scope="col">Rôle</th><th scope="col">État</th></tr>
+      </thead>
+      <tbody>
+        {% for account in utilisateurs %}
+        <tr>
+          <td class="fw-semibold">{{ account.get_full_name|default:account.username }}</td>
+          <td class="small text-secondary">{{ account.email|default:"Adresse non renseignée" }}</td>
+          <td><span class="mt-role-chip">{{ account.get_role_display }}</span></td>
+          <td><span class="mt-status-badge{% if account.is_active %} mt-status-traite{% else %} mt-status-en_attente{% endif %}">{% if account.is_active %}Actif{% else %}Inactif{% endif %}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="py-4 text-center text-secondary">Aucun utilisateur n’est enregistré.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}
